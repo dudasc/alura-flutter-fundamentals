@@ -7,60 +7,65 @@ class BytebankApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: TransferList(),
-      ),
+    return MaterialApp(
+      home: TransferList(),
     );
   }
 }
 
-class FormTranfer extends StatelessWidget {
+class FormTranfer extends StatefulWidget {
+  const FormTranfer({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return FormTranferState();
+  }
+}
+
+class FormTranferState extends State<FormTranfer> {
   final TextEditingController _accountNumberController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
-
-  FormTranfer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Fazer transferência')),
-      body: Column(
-        children: <Widget>[
-          Editor(
-            controller: _accountNumberController,
-            label: 'Account number',
-            hint: '0000',
-          ),
-          Editor(
-            controller: _valueController,
-            label: 'Value',
-            hint: '0.0',
-            icon: Icons.monetization_on,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () => _createTransfer(context),
-              child: const Text('Enviar'),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Editor(
+              controller: _accountNumberController,
+              label: 'Account number',
+              hint: '0000',
             ),
-          ),
-        ],
+            Editor(
+              controller: _valueController,
+              label: 'Value',
+              hint: '0.0',
+              icon: Icons.monetization_on,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () => _createTransfer(context),
+                child: const Text('Enviar'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _createTransfer(BuildContext context) {
     final int? accountNumber = int.tryParse(_accountNumberController.text);
-    final double? value = double.tryParse(_accountNumberController.text);
+    final double? value = double.tryParse(_valueController.text);
 
-    if (value != null && accountNumber != null) {
-      final transfer = Transfer(accountNumber, value);
-      debugPrint('$transfer');
-
-      debugPrint('Criando a transferência');
-
-      Navigator.pop(context, transfer);
+    if (accountNumber != null && value != null) {
+      final transferCreated = Transfer(accountNumber, value);
+      debugPrint('Criando transferência');
+      debugPrint('$transferCreated');
+      Navigator.pop(context, transferCreated);
     }
   }
 }
@@ -87,29 +92,46 @@ class Editor extends StatelessWidget {
   }
 }
 
-class TransferList extends StatelessWidget {
-  const TransferList({Key? key}) : super(key: key);
+class TransferList extends StatefulWidget {
+  TransferList({Key? key}) : super(key: key);
 
+  final List _transferList = [];
+
+  @override
+  State<StatefulWidget> createState() {
+    return TransferListState();
+  }
+}
+
+class TransferListState extends State<TransferList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Transferencias')),
-      body: Column(
-        children: [
-          TransferListItem(Transfer(59635, 100.0)),
-          TransferListItem(Transfer(2023, 99.0)),
-          TransferListItem(Transfer(9980, 538.4)),
-        ],
+      body: ListView.builder(
+        itemCount: widget._transferList.length,
+        itemBuilder: (context, index) {
+          final transfer = widget._transferList[index];
+
+          return TransferListItem(transfer);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
           final Future future = Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return FormTranfer();
+            return const FormTranfer();
           }));
           future.then((transferReceived) {
-            debugPrint('them do future');
-            debugPrint('$transferReceived');
+            Future.delayed(const Duration(seconds: 1), () {
+              debugPrint('chegou no then do future');
+              debugPrint('$transferReceived');
+              if (transferReceived != null) {
+                setState(() {
+                  widget._transferList.add(transferReceived);
+                });
+              }
+            });
           });
         },
       ),
