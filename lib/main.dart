@@ -27,42 +27,21 @@ class FormTranfer extends StatelessWidget {
       appBar: AppBar(title: const Text('Fazer transferência')),
       body: Column(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _accountNumberController,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                label: Text('Conta'),
-                hintText: '0000',
-              ),
-            ),
+          Editor(
+            controller: _accountNumberController,
+            label: 'Account number',
+            hint: '0000',
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _valueController,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                label: Text('Valor'),
-                icon: Icon(Icons.monetization_on),
-                hintText: '0.0',
-              ),
-            ),
+          Editor(
+            controller: _valueController,
+            label: 'Value',
+            hint: '0.0',
+            icon: Icons.monetization_on,
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: () {                
-                final int? accountNumber = int.tryParse(_accountNumberController.text);
-                final double? value = double.tryParse(_accountNumberController.text);               
-
-                if (value != null && accountNumber != null) {
-                  final transfer = Transfer(accountNumber, value);
-
-                  debugPrint('$transfer');
-                }
-              },
+              onPressed: () => _createTransfer(),
               child: const Text('Enviar'),
             ),
           ),
@@ -71,6 +50,37 @@ class FormTranfer extends StatelessWidget {
     );
   }
 
+  void _createTransfer() {
+    final int? accountNumber = int.tryParse(_accountNumberController.text);
+    final double? value = double.tryParse(_accountNumberController.text);
+
+    if (value != null && accountNumber != null) {
+      final transfer = Transfer(accountNumber, value);
+      debugPrint('$transfer');
+    }
+  }
+}
+
+class Editor extends StatelessWidget {
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final IconData? icon;
+
+  Editor({this.controller, this.label, this.hint, this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(fontSize: 12),
+        decoration: InputDecoration(label: Text(label!), hintText: hint, icon: icon != null ? Icon(icon) : null),
+        keyboardType: TextInputType.number,
+      ),
+    );
+  }
 }
 
 class TransferList extends StatelessWidget {
