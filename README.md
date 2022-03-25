@@ -1,2 +1,2 @@
 # alura-bytebank
-Projeto criado no curso de formação em flutter da alura
+Projeto criado no curso de fundamentos do flutter da alura
